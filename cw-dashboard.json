@@ -1,0 +1,214 @@
+{
+  "widgets": [
+      {
+          "height": 3,
+          "width": 24,
+          "y": 0,
+          "x": 0,
+          "type": "text",
+          "properties": {
+              "markdown": "# Sagemaker Endpoint Dashboard \n### Endpoint Name: **${EndpointName}** \n### Region: **${AWS::Region}**"
+          }
+      },
+      {
+          "type": "alarm",
+          "x": 0,
+          "y": 3,
+          "width": 24,
+          "height": 3,
+          "properties": {
+              "title": "Endpoint Alarms",
+              "alarms": [
+                  "${OverheadLatencyAlarm.Arn}",
+                  "${Invocation5XXErrorsAlarm.Arn}",
+                  "${Invocation4XXErrorsAlarm.Arn}",
+                  "${ModelLatencyAlarm.Arn}",
+                  "${TooManyInvocationsPerInstanceAlarm.Arn}",
+                  "${TooManyInvocationsAlarm.Arn}",
+                  "${NotEnoughInvocationsAlarm.Arn}",
+                  "${DiskUtilizationAlarm.Arn}",
+                  "${MemoryUtilizationAlarm.Arn}",
+                  "${CPUUtilizationAlarm.Arn}",
+                  "${GPUMemoryUtilizationAlarm.Arn}",
+                  "${GPUUtilizationAlarm.Arn}"
+              ]
+          }
+      },
+      {
+          "height": 6,
+          "width": 8,
+          "y": 6,
+          "x": 0,
+          "type": "metric",
+          "properties": {
+              "view": "timeSeries",
+              "stacked": false,
+              "metrics": [
+                  [ "/aws/sagemaker/Endpoints", "CPUUtilization", "EndpointName", "${EndpointName}", "VariantName", "AllTraffic" ]
+              ],
+              "region": "${AWS::Region}",
+              "title": "CPU Utilization"
+          }
+      },
+      {
+          "height": 6,
+          "width": 8,
+          "y": 6,
+          "x": 8,
+          "type": "metric",
+          "properties": {
+              "view": "timeSeries",
+              "stacked": false,
+              "metrics": [
+                  [ "/aws/sagemaker/Endpoints", "MemoryUtilization", "EndpointName", "${EndpointName}", "VariantName", "AllTraffic" ]
+              ],
+              "region": "${AWS::Region}",
+              "title": "Memory Utilization"
+          }
+      },
+      {
+          "height": 6,
+          "width": 8,
+          "y": 6,
+          "x": 16,
+          "type": "metric",
+          "properties": {
+              "view": "timeSeries",
+              "stacked": false,
+              "metrics": [
+                  [ "/aws/sagemaker/Endpoints", "DiskUtilization", "EndpointName", "${EndpointName}", "VariantName", "AllTraffic" ]
+              ],
+              "region": "${AWS::Region}",
+              "title": "Disk Utilization"
+          }
+      },
+      {
+          "height": 6,
+          "width": 8,
+          "y": 12,
+          "x": 0,
+          "type": "metric",
+          "properties": {
+              "view": "timeSeries",
+              "stacked": false,
+              "metrics": [
+                  [ "/aws/sagemaker/Endpoints", "GPUUtilization", "EndpointName", "${EndpointName}", "VariantName", "AllTraffic" ]
+              ],
+              "region": "${AWS::Region}",
+              "title": "GPU Utilization"
+          }
+      },
+      {
+          "height": 6,
+          "width": 8,
+          "y": 12,
+          "x": 8,
+          "type": "metric",
+          "properties": {
+              "view": "timeSeries",
+              "stacked": false,
+              "metrics": [
+                  [ "/aws/sagemaker/Endpoints", "GPUMemoryUtilization", "EndpointName", "${EndpointName}", "VariantName", "AllTraffic" ]
+              ],
+              "region": "${AWS::Region}",
+              "title": "GPU Memory Utilization"
+          }
+      },
+      {
+          "height": 6,
+          "width": 8,
+          "y": 12,
+          "x": 16,
+          "type": "metric",
+          "properties": {
+              "view": "timeSeries",
+              "stacked": false,
+              "metrics": [
+                  [ "AWS/SageMaker", "Invocations", "EndpointName", "${EndpointName}", "VariantName", "AllTraffic" ]
+              ],
+              "region": "${AWS::Region}",
+              "title": "Invocations"
+          }
+      },
+      {
+          "height": 6,
+          "width": 8,
+          "y": 18,
+          "x": 0,
+          "type": "metric",
+          "properties": {
+              "view": "timeSeries",
+              "stacked": false,
+              "metrics": [
+                  [ "AWS/SageMaker", "Invocation4XXErrors", "EndpointName", "${EndpointName}", "VariantName", "AllTraffic" ]
+              ],
+              "region": "${AWS::Region}",
+              "title": "Invocation 4XX Errors"
+          }
+      },
+      {
+          "height": 6,
+          "width": 8,
+          "y": 18,
+          "x": 8,
+          "type": "metric",
+          "properties": {
+              "view": "timeSeries",
+              "stacked": false,
+              "metrics": [
+                  [ "AWS/SageMaker", "Invocation5XXErrors", "EndpointName", "${EndpointName}", "VariantName", "AllTraffic" ]
+              ],
+              "region": "${AWS::Region}",
+              "title": "Invocation 5XX Errors"
+          }
+      },
+      {
+          "height": 6,
+          "width": 8,
+          "y": 18,
+          "x": 16,
+          "type": "metric",
+          "properties": {
+              "view": "timeSeries",
+              "stacked": false,
+              "metrics": [
+                  [ "AWS/SageMaker", "InvocationsPerInstance", "EndpointName", "${EndpointName}", "VariantName", "AllTraffic" ]
+              ],
+              "region": "${AWS::Region}",
+              "title": "Invocations per Instance"
+          }
+      },
+      {
+          "height": 6,
+          "width": 8,
+          "y": 24,
+          "x": 0,
+          "type": "metric",
+          "properties": {
+              "view": "timeSeries",
+              "stacked": false,
+              "metrics": [
+                  [ "AWS/SageMaker", "ModelLatency", "EndpointName", "${EndpointName}", "VariantName", "AllTraffic" ]
+              ],
+              "region": "${AWS::Region}",
+              "title": "Model Latency"
+          }
+      },
+      {
+          "height": 6,
+          "width": 8,
+          "y": 24,
+          "x": 8,
+          "type": "metric",
+          "properties": {
+              "view": "timeSeries",
+              "stacked": false,
+              "metrics": [
+                  [ "AWS/SageMaker", "OverheadLatency", "EndpointName", "${EndpointName}", "VariantName", "AllTraffic" ]
+              ],
+              "region": "${AWS::Region}",
+              "title": "Overhead Latency"
+          }
+      }
+  ]
+}

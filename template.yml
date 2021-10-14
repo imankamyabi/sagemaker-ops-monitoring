@@ -1,0 +1,633 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Cloudformation template for operational monitoring of a sagemaker endpoint
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "SageMaker Endpoint"
+        Parameters:
+          - EndpointName
+      - Label:
+          default: "CPU Utilization Alarm"
+        Parameters:
+          - CPUUtilizationThreshold
+          - CPUUtilizationPeriod
+          - CPUUtilizationEvaluationPeriods
+      - Label:
+          default: "Memory Utilization Alarm"
+        Parameters:
+          - MemoryUtilizationThreshold
+          - MemoryUtilizationPeriod
+          - MemoryUtilizationEvaluationPeriods
+      - Label:
+          default: "Disk Utilization Alarm"
+        Parameters:
+          - DiskUtilizationThreshold
+          - DiskUtilizationPeriod
+          - DiskUtilizationEvaluationPeriods
+      - Label:
+          default: "GPU Utilization Alarm"
+        Parameters:
+          - GPUUtilizationThreshold
+          - GPUUtilizationPeriod
+          - GPUUtilizationEvaluationPeriods
+      - Label:
+          default: "GPU Memory Utilization Alarm"
+        Parameters:
+          - GPUMemoryUtilizationThreshold
+          - GPUMemoryUtilizationPeriod
+          - GPUMemoryUtilizationEvaluationPeriods
+      - Label:
+          default: "Too Many Invocations Alarm"
+        Parameters:
+          - TooManyInvocationsThreshold
+          - TooManyInvocationsPeriod
+          - TooManyInvocationsEvaluationPeriods
+      - Label:
+          default: "Not Enough Invocations Alarm"
+        Parameters:
+          - NotEnoughInvocationsThreshold
+          - NotEnoughInvocationsPeriod
+          - NotEnoughInvocationsEvaluationPeriods
+      - Label:
+          default: "4XX Errors Alarm"
+        Parameters:
+          - Invocation4XXErrorsThreshold
+          - Invocation4XXErrorsPeriod
+          - Invocation4XXErrorsEvaluationPeriods
+      - Label:
+          default: "5XX Errors Alarm"
+        Parameters:
+          - Invocation5XXErrorsThreshold
+          - Invocation5XXErrorsPeriod
+          - Invocation5XXErrorsEvaluationPeriods
+      - Label:
+          default: "Too Many Invocations Per Instance Alarm"
+        Parameters:
+          - TooManyInvocationsPerInstanceThreshold
+          - TooManyInvocationsPerInstancePeriod
+          - TooManyInvocationsPerInstanceEvaluationPeriods
+      - Label:
+          default: "Model Latency Alarm"
+        Parameters:
+          - ModelLatencyThreshold
+          - ModelLatencyPeriod
+          - ModelLatencyEvaluationPeriods
+      - Label:
+          default: "Overhead Latency Alarm"
+        Parameters:
+          - OverheadLatencyThreshold
+          - OverheadLatencyPeriod
+          - OverheadLatencyEvaluationPeriods
+    ParameterLabels:
+      EndpointName:
+        default: "Name"
+      CPUUtilizationThreshold:
+        default: "Threshold"
+      CPUUtilizationPeriod:
+        default: "Period"
+      CPUUtilizationEvaluationPeriods:
+        default: "Evaluation Periods"
+      MemoryUtilizationThreshold:
+        default: "Threshold"
+      MemoryUtilizationPeriod:
+        default: "Period"
+      MemoryUtilizationEvaluationPeriods:
+        default: "Evaluation Periods"
+      DiskUtilizationThreshold:
+        default: "Threshold"
+      DiskUtilizationPeriod:
+        default: "Period"
+      DiskUtilizationEvaluationPeriods:
+        default: "Evaluation Periods"
+      GPUUtilizationThreshold:
+        default: "Threshold"
+      GPUUtilizationPeriod:
+        default: "Period"
+      GPUUtilizationEvaluationPeriods:
+        default: "Evaluation Periods"
+      GPUMemoryUtilizationThreshold:
+        default: "Threshold"
+      GPUMemoryUtilizationPeriod:
+        default: "Period"
+      GPUMemoryUtilizationEvaluationPeriods:
+        default: "Evaluation Periods"
+      TooManyInvocationsThreshold:
+        default: "Threshold"
+      TooManyInvocationsPeriod:
+        default: "Period"
+      TooManyInvocationsEvaluationPeriods:
+        default: "Evaluation Periods"
+      NotEnoughInvocationsPeriod:
+        default: "Period"
+      NotEnoughInvocationsEvaluationPeriods:
+        default: "Evaluation Periods"
+      NotEnoughInvocationsThreshold:
+        default: "Threshold"
+      Invocation4XXErrorsPeriod:
+        default: "Period"
+      Invocation4XXErrorsEvaluationPeriods:
+        default: "Evaluation Periods"
+      Invocation4XXErrorsThreshold:
+        default: "Threshold"
+      Invocation5XXErrorsPeriod:
+        default: "Period"
+      Invocation5XXErrorsEvaluationPeriods:
+        default: "Evaluation Periods"
+      Invocation5XXErrorsThreshold:
+        default: "Threshold"
+      TooManyInvocationsPerInstancePeriod:
+        default: "Period"
+      TooManyInvocationsPerInstanceEvaluationPeriods:
+        default: "Evaluation Periods"
+      TooManyInvocationsPerInstanceThreshold:
+        default: "Threshold"
+      ModelLatencyPeriod:
+        default: "Period"
+      ModelLatencyEvaluationPeriods:
+        default: "Evaluation Periods"
+      ModelLatencyThreshold:
+        default: "Threshold"
+      OverheadLatencyPeriod:
+        default: "Period"
+      OverheadLatencyEvaluationPeriods:
+        default: "Evaluation Periods"
+      OverheadLatencyThreshold:
+        default: "Threshold"
+
+Parameters:
+  EndpointName:
+    Type: String
+    Description: The name of the SageMaker endpoint to monitor
+    AllowedPattern: "^[a-zA-Z0-9](-*[a-zA-Z0-9]){0,62}"
+    MaxLength: 63
+
+  CPUUtilizationThreshold:
+    Type: Number
+    Description: The threshold value in percentage for the CPU Utilization Alarm
+    Default: 80
+    MinValue: 0
+    MaxValue: 100
+
+  CPUUtilizationPeriod:
+    Type: Number
+    Description: The evaluation priod, in seconds, over which the average CPU utilization is measured
+    Default: 60
+    MinValue: 10
+
+  CPUUtilizationEvaluationPeriods:
+    Type: Number
+    Description: The number of datapoints within the evaluation period that must be breaching to cause the alarm to go to ALARM state
+    Default: 1
+    MinValue: 1
+
+  MemoryUtilizationThreshold:
+    Type: Number
+    Description: The threshold value in percentage for the Memory Utilization Alarm
+    Default: 80
+    MinValue: 0
+    MaxValue: 100
+
+  MemoryUtilizationPeriod:
+    Type: Number
+    Description: The evaluation priod, in seconds, over which the average Memory utilization is measured
+    Default: 60
+    MinValue: 10
+
+  MemoryUtilizationEvaluationPeriods:
+    Type: Number
+    Description: The number of datapoints within the evaluation period that must be breaching to cause the alarm to go to ALARM state
+    Default: 1
+    MinValue: 1
+
+  DiskUtilizationThreshold:
+    Type: Number
+    Description: The threshold value in percentage for the Disk Utilization Alarm
+    Default: 80
+    MinValue: 0
+    MaxValue: 100
+
+  DiskUtilizationPeriod:
+    Type: Number
+    Description: The evaluation priod, in seconds, over which the average Disk utilization is measured
+    Default: 60
+    MinValue: 10
+
+  DiskUtilizationEvaluationPeriods:
+    Type: Number
+    Description: The number of datapoints within the evaluation period that must be breaching to cause the alarm to go to ALARM state
+    Default: 1
+    MinValue: 1
+
+  GPUUtilizationThreshold:
+    Type: Number
+    Description: The threshold value in percentage for the GPU Utilization Alarm
+    Default: 80
+    MinValue: 0
+    MaxValue: 100
+
+  GPUUtilizationPeriod:
+    Type: Number
+    Description: The evaluation priod, in seconds, over which the average GPU utilization is measured
+    Default: 60
+    MinValue: 10
+
+  GPUUtilizationEvaluationPeriods:
+    Type: Number
+    Description: The number of datapoints within the evaluation period that must be breaching to cause the alarm to go to ALARM state
+    Default: 1
+    MinValue: 1
+
+  GPUMemoryUtilizationThreshold:
+    Type: Number
+    Description: The threshold value in percentage for the GPU Memory Utilization Alarm
+    Default: 80
+    MinValue: 0
+    MaxValue: 100
+
+  GPUMemoryUtilizationPeriod:
+    Type: Number
+    Description: The evaluation priod, in seconds, over which the average GPU Memory utilization is measured
+    Default: 60
+    MinValue: 10
+
+  GPUMemoryUtilizationEvaluationPeriods:
+    Type: Number
+    Description: The number of datapoints within the evaluation period that must be breaching to cause the alarm to go to ALARM state
+    Default: 1
+    MinValue: 1
+
+  TooManyInvocationsThreshold:
+    Type: Number
+    Description: The threshold value for the too many invocations Alarm
+    Default: 1000
+
+  TooManyInvocationsPeriod:
+    Type: Number
+    Description: The evaluation priod, in seconds, over which the Sum of invocations is measured
+    Default: 60
+    MinValue: 10
+
+  TooManyInvocationsEvaluationPeriods:
+    Type: Number
+    Description: The number of datapoints within the evaluation period that must be breaching to cause the alarm to go to ALARM state
+    Default: 1
+    MinValue: 1
+
+  NotEnoughInvocationsThreshold:
+    Type: Number
+    Description: The threshold value for the not enough invocations Alarm
+    Default: 0
+
+  NotEnoughInvocationsPeriod:
+    Type: Number
+    Description: The evaluation priod, in seconds, over which the Sum of invocations is measured
+    Default: 60
+    MinValue: 10
+
+  NotEnoughInvocationsEvaluationPeriods:
+    Type: Number
+    Description: The number of datapoints within the evaluation period that must be breaching to cause the alarm to go to ALARM state
+    Default: 1
+    MinValue: 1
+
+  Invocation4XXErrorsThreshold:
+    Type: Number
+    Description: The threshold value for the 4XX Errors Alarm
+    Default: 1
+
+  Invocation4XXErrorsPeriod:
+    Type: Number
+    Description: The evaluation priod, in seconds, over which the Sum of 4XX Errors is measured
+    Default: 60
+    MinValue: 10
+
+  Invocation4XXErrorsEvaluationPeriods:
+    Type: Number
+    Description: The number of datapoints within the evaluation period that must be breaching to cause the alarm to go to ALARM state
+    Default: 1
+    MinValue: 1
+
+  Invocation5XXErrorsThreshold:
+    Type: Number
+    Description: The threshold value for the 5XX Errors Alarm
+    Default: 1
+
+  Invocation5XXErrorsPeriod:
+    Type: Number
+    Description: The evaluation priod, in seconds, over which the Sum of 5XX Errors is measured
+    Default: 60
+    MinValue: 10
+
+  Invocation5XXErrorsEvaluationPeriods:
+    Type: Number
+    Description: The number of datapoints within the evaluation period that must be breaching to cause the alarm to go to ALARM state
+    Default: 1
+    MinValue: 1
+
+  TooManyInvocationsPerInstanceThreshold:
+    Type: Number
+    Description: The threshold value for the too many invocations per instance Alarm
+    Default: 300
+
+  TooManyInvocationsPerInstancePeriod:
+    Type: Number
+    Description: The evaluation priod, in seconds, over which the Sum of invocations per instance is measured
+    Default: 60
+    MinValue: 10
+
+  TooManyInvocationsPerInstanceEvaluationPeriods:
+    Type: Number
+    Description: The number of datapoints within the evaluation period that must be breaching to cause the alarm to go to ALARM state
+    Default: 1
+    MinValue: 1
+
+  ModelLatencyThreshold:
+    Type: Number
+    Description: The threshold value in microseconds for the model latency Alarm
+    Default: 1000000
+
+  ModelLatencyPeriod:
+    Type: Number
+    Description: The evaluation priod, in seconds, over which the model latency is measured
+    Default: 60
+    MinValue: 10
+
+  ModelLatencyEvaluationPeriods:
+    Type: Number
+    Description: The number of datapoints within the evaluation period that must be breaching to cause the alarm to go to ALARM state
+    Default: 1
+    MinValue: 1
+
+  OverheadLatencyThreshold:
+    Type: Number
+    Description: The threshold value in microseconds for overhead latency Alarm
+    Default: 100000
+
+  OverheadLatencyPeriod:
+    Type: Number
+    Description: The evaluation priod, in seconds, over which the Sum of overhead latency is measured
+    Default: 60
+    MinValue: 10
+
+  OverheadLatencyEvaluationPeriods:
+    Type: Number
+    Description: The number of datapoints within the evaluation period that must be breaching to cause the alarm to go to ALARM state
+    Default: 1
+    MinValue: 1
+
+Resources:
+  AlarmTopic:
+    Type: AWS::SNS::Topic
+    Description: The SNS topic that the alarm notifications are published to it
+    Properties:
+      TopicName: EndpointAlarmTopic
+
+  CPUUtilizationAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: The CloudWatch Alarm for CPU Utilization of the SageMaker endpoint
+      AlarmActions:
+        - !Ref AlarmTopic
+      MetricName: CPUUtilization
+      Namespace: /aws/sagemaker/Endpoints
+      Statistic: Average
+      Period: !Ref CPUUtilizationPeriod
+      EvaluationPeriods: !Ref CPUUtilizationEvaluationPeriods
+      Threshold: !Ref CPUUtilizationThreshold
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: EndpointName
+          Value: !Ref EndpointName
+        - Name: VariantName
+          Value: AllTraffic
+
+  MemoryUtilizationAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: The CloudWatch Alarm for Memory Utilization of the SageMaker endpoint
+      AlarmActions:
+        - !Ref AlarmTopic
+      MetricName: MemoryUtilization
+      Namespace: /aws/sagemaker/Endpoints
+      Statistic: Average
+      Period: !Ref MemoryUtilizationPeriod
+      EvaluationPeriods: !Ref MemoryUtilizationEvaluationPeriods
+      Threshold: !Ref MemoryUtilizationThreshold
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: EndpointName
+          Value: !Ref EndpointName
+        - Name: VariantName
+          Value: AllTraffic
+
+  DiskUtilizationAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: The CloudWatch Alarm for Disk Utilization of the SageMaker endpoint
+      AlarmActions:
+        - !Ref AlarmTopic
+      MetricName: DiskUtilization
+      Namespace: /aws/sagemaker/Endpoints
+      Statistic: Average
+      Period: !Ref DiskUtilizationPeriod
+      EvaluationPeriods: !Ref DiskUtilizationEvaluationPeriods
+      Threshold: !Ref DiskUtilizationThreshold
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: EndpointName
+          Value: !Ref EndpointName
+        - Name: VariantName
+          Value: AllTraffic
+
+  GPUUtilizationAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: The CloudWatch Alarm for GPU Utilization of the SageMaker endpoint
+      AlarmActions:
+        - !Ref AlarmTopic
+      MetricName: GPUUtilization
+      Namespace: /aws/sagemaker/Endpoints
+      Statistic: Average
+      Period: !Ref GPUUtilizationPeriod
+      EvaluationPeriods: !Ref GPUUtilizationEvaluationPeriods
+      Threshold: !Ref GPUUtilizationThreshold
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: EndpointName
+          Value: !Ref EndpointName
+        - Name: VariantName
+          Value: AllTraffic
+
+  GPUMemoryUtilizationAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: The CloudWatch Alarm for GPU Memory Utilization of the SageMaker endpoint
+      AlarmActions:
+        - !Ref AlarmTopic
+      MetricName: GPUMemoryUtilization
+      Namespace: /aws/sagemaker/Endpoints
+      Statistic: Average
+      Period: !Ref GPUMemoryUtilizationPeriod
+      EvaluationPeriods: !Ref GPUMemoryUtilizationEvaluationPeriods
+      Threshold: !Ref GPUMemoryUtilizationThreshold
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: EndpointName
+          Value: !Ref EndpointName
+        - Name: VariantName
+          Value: AllTraffic
+
+  TooManyInvocationsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: The CloudWatch Alarm for when there are too many invocations of the SageMaker endpoint
+      AlarmActions:
+        - !Ref AlarmTopic
+      MetricName: Invocations
+      Namespace: AWS/SageMaker
+      Statistic: Sum
+      Period: !Ref TooManyInvocationsPeriod
+      EvaluationPeriods: !Ref TooManyInvocationsEvaluationPeriods
+      Threshold: !Ref TooManyInvocationsThreshold
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: EndpointName
+          Value: !Ref EndpointName
+        - Name: VariantName
+          Value: AllTraffic
+
+  NotEnoughInvocationsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: The CloudWatch Alarm for when there aren't enough invocations of the SageMaker endpoint
+      AlarmActions:
+        - !Ref AlarmTopic
+      MetricName: Invocations
+      Namespace: AWS/SageMaker
+      Statistic: Sum
+      Period: !Ref NotEnoughInvocationsPeriod
+      EvaluationPeriods: !Ref NotEnoughInvocationsEvaluationPeriods
+      Threshold: !Ref NotEnoughInvocationsThreshold
+      ComparisonOperator: LessThanThreshold
+      Dimensions:
+        - Name: EndpointName
+          Value: !Ref EndpointName
+        - Name: VariantName
+          Value: AllTraffic
+
+  Invocation4XXErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: The CloudWatch Alarm for 4XX errors of the SageMaker endpoint invocations
+      AlarmActions:
+        - !Ref AlarmTopic
+      MetricName: Invocation4XXErrors
+      Namespace: AWS/SageMaker
+      Statistic: Sum
+      Period: !Ref Invocation4XXErrorsPeriod
+      EvaluationPeriods: !Ref Invocation4XXErrorsEvaluationPeriods
+      Threshold: !Ref Invocation4XXErrorsThreshold
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: EndpointName
+          Value: !Ref EndpointName
+        - Name: VariantName
+          Value: AllTraffic
+
+  Invocation5XXErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: The CloudWatch Alarm for 5XX errors of the SageMaker endpoint invocations
+      AlarmActions:
+        - !Ref AlarmTopic
+      MetricName: Invocation5XXErrors
+      Namespace: AWS/SageMaker
+      Statistic: Sum
+      Period: !Ref Invocation5XXErrorsPeriod
+      EvaluationPeriods: !Ref Invocation5XXErrorsEvaluationPeriods
+      Threshold: !Ref Invocation5XXErrorsThreshold
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: EndpointName
+          Value: !Ref EndpointName
+        - Name: VariantName
+          Value: AllTraffic
+
+  TooManyInvocationsPerInstanceAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: The CloudWatch Alarm for when there are too many invocations of the SageMaker endpoint per instance
+      AlarmActions:
+        - !Ref AlarmTopic
+      MetricName: InvocationsPerInstance
+      Namespace: AWS/SageMaker
+      Statistic: Sum
+      Period: !Ref TooManyInvocationsPerInstancePeriod
+      EvaluationPeriods: !Ref TooManyInvocationsPerInstanceEvaluationPeriods
+      Threshold: !Ref TooManyInvocationsPerInstanceThreshold
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: EndpointName
+          Value: !Ref EndpointName
+        - Name: VariantName
+          Value: AllTraffic
+
+  ModelLatencyAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: The CloudWatch Alarm for the SageMaker model latency
+      AlarmActions:
+        - !Ref AlarmTopic
+      MetricName: ModelLatency
+      Namespace: AWS/SageMaker
+      Statistic: Average
+      Period: !Ref ModelLatencyPeriod
+      EvaluationPeriods: !Ref ModelLatencyEvaluationPeriods
+      Threshold: !Ref ModelLatencyThreshold
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: EndpointName
+          Value: !Ref EndpointName
+        - Name: VariantName
+          Value: AllTraffic
+
+  OverheadLatencyAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: The CloudWatch Alarm for the SageMaker model overhead latency
+      AlarmActions:
+        - !Ref AlarmTopic
+      MetricName: OverheadLatency
+      Namespace: AWS/SageMaker
+      Statistic: Average
+      Period: !Ref OverheadLatencyPeriod
+      EvaluationPeriods: !Ref OverheadLatencyEvaluationPeriods
+      Threshold: !Ref OverheadLatencyThreshold
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: EndpointName
+          Value: !Ref EndpointName
+        - Name: VariantName
+          Value: AllTraffic
+
+  EndpointMonitoringDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: !Sub "${EndpointName}-dashboard"
+      DashboardBody: !Sub '{"widgets":[{"height":3,"width":24,"y":0,"x":0,"type":"text","properties":{"markdown":"# Sagemaker Endpoint Dashboard \n### Endpoint Name: **${EndpointName}** \n### Region: **${AWS::Region}**"}},{"type":"alarm","x":0,"y":3,"width":24,"height":3,"properties":{"title":"Endpoint Alarms","alarms":["${OverheadLatencyAlarm.Arn}","${Invocation5XXErrorsAlarm.Arn}","${Invocation4XXErrorsAlarm.Arn}","${ModelLatencyAlarm.Arn}","${TooManyInvocationsPerInstanceAlarm.Arn}","${TooManyInvocationsAlarm.Arn}","${NotEnoughInvocationsAlarm.Arn}","${DiskUtilizationAlarm.Arn}","${MemoryUtilizationAlarm.Arn}","${CPUUtilizationAlarm.Arn}","${GPUMemoryUtilizationAlarm.Arn}","${GPUUtilizationAlarm.Arn}"]}},{"height":6,"width":8,"y":6,"x":0,"type":"metric","properties":{"view":"timeSeries","stacked":false,"metrics":[["/aws/sagemaker/Endpoints","CPUUtilization","EndpointName","${EndpointName}","VariantName","AllTraffic"]],"region":"${AWS::Region}","title":"CPU Utilization"}},{"height":6,"width":8,"y":6,"x":8,"type":"metric","properties":{"view":"timeSeries","stacked":false,"metrics":[["/aws/sagemaker/Endpoints","MemoryUtilization","EndpointName","${EndpointName}","VariantName","AllTraffic"]],"region":"${AWS::Region}","title":"Memory Utilization"}},{"height":6,"width":8,"y":6,"x":16,"type":"metric","properties":{"view":"timeSeries","stacked":false,"metrics":[["/aws/sagemaker/Endpoints","DiskUtilization","EndpointName","${EndpointName}","VariantName","AllTraffic"]],"region":"${AWS::Region}","title":"Disk Utilization"}},{"height":6,"width":8,"y":12,"x":0,"type":"metric","properties":{"view":"timeSeries","stacked":false,"metrics":[["/aws/sagemaker/Endpoints","GPUUtilization","EndpointName","${EndpointName}","VariantName","AllTraffic"]],"region":"${AWS::Region}","title":"GPU Utilization"}},{"height":6,"width":8,"y":12,"x":8,"type":"metric","properties":{"view":"timeSeries","stacked":false,"metrics":[["/aws/sagemaker/Endpoints","GPUMemoryUtilization","EndpointName","${EndpointName}","VariantName","AllTraffic"]],"region":"${AWS::Region}","title":"GPU Memory Utilization"}},{"height":6,"width":8,"y":12,"x":16,"type":"metric","properties":{"view":"timeSeries","stacked":false,"metrics":[["AWS/SageMaker","Invocations","EndpointName","${EndpointName}","VariantName","AllTraffic"]],"region":"${AWS::Region}","title":"Invocations"}},{"height":6,"width":8,"y":18,"x":0,"type":"metric","properties":{"view":"timeSeries","stacked":false,"metrics":[["AWS/SageMaker","Invocation4XXErrors","EndpointName","${EndpointName}","VariantName","AllTraffic"]],"region":"${AWS::Region}","title":"Invocation 4XX Errors"}},{"height":6,"width":8,"y":18,"x":8,"type":"metric","properties":{"view":"timeSeries","stacked":false,"metrics":[["AWS/SageMaker","Invocation5XXErrors","EndpointName","${EndpointName}","VariantName","AllTraffic"]],"region":"${AWS::Region}","title":"Invocation 5XX Errors"}},{"height":6,"width":8,"y":18,"x":16,"type":"metric","properties":{"view":"timeSeries","stacked":false,"metrics":[["AWS/SageMaker","InvocationsPerInstance","EndpointName","${EndpointName}","VariantName","AllTraffic"]],"region":"${AWS::Region}","title":"Invocations per Instance"}},{"height":6,"width":8,"y":24,"x":0,"type":"metric","properties":{"view":"timeSeries","stacked":false,"metrics":[["AWS/SageMaker","ModelLatency","EndpointName","${EndpointName}","VariantName","AllTraffic"]],"region":"${AWS::Region}","title":"Model Latency"}},{"height":6,"width":8,"y":24,"x":8,"type":"metric","properties":{"view":"timeSeries","stacked":false,"metrics":[["AWS/SageMaker","OverheadLatency","EndpointName","${EndpointName}","VariantName","AllTraffic"]],"region":"${AWS::Region}","title":"Overhead Latency"}}]}'
+
+Outputs:
+  AlarmTopicArn:
+    Description: ARN for the Alarm SNS Topic
+    Value: !Ref AlarmTopic
+
+  DashboardName:
+    Description: The name for the cloudwatch dashboard
+    Value: !Ref EndpointMonitoringDashboard
+
+  DashboardUrl:
+    Description: The URL to the Cloudwatch Dashboard
+    Value: !Sub "https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#dashboards:name=${EndpointMonitoringDashboard}"
